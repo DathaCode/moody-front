@@ -46,43 +46,16 @@ export function PlaylistResults({ moodData, playlist, onSpotifyConnect, onTryAga
         <CardContent className="p-6">
           <div className="flex items-center gap-4 mb-4">
             <div
-              className={`w-12 h-12 ${getEmotionColor(moodData.primary_emotion)} rounded-full flex items-center justify-center text-2xl`}
+              className={`w-12 h-12 ${getEmotionColor(moodData.primaryEmotion)} rounded-full flex items-center justify-center text-2xl`}
             >
-              {getEmotionEmoji(moodData.primary_emotion)}
+              {getEmotionEmoji(moodData.primaryEmotion)}
             </div>
             <div>
-              <h3 className="text-xl font-bold text-white capitalize">{moodData.primary_emotion} Vibes</h3>
+              <h3 className="text-xl font-bold text-white capitalize">{moodData.primaryEmotion} Vibes</h3>
               <p className="text-white/70">{Math.round(moodData.confidence * 100)}% confidence match</p>
             </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/5 rounded-lg p-3">
-              <p className="text-white/60 text-sm">Energy Level</p>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex-1 bg-white/10 rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-green-400 to-yellow-400 h-full rounded-full transition-all duration-1000"
-                    style={{ width: `${moodData.energy_level * 100}%` }}
-                  ></div>
-                </div>
-                <span className="text-white text-sm font-medium">{Math.round(moodData.energy_level * 100)}%</span>
-              </div>
-            </div>
-
-            <div className="bg-white/5 rounded-lg p-3">
-              <p className="text-white/60 text-sm">Positivity</p>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="flex-1 bg-white/10 rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-blue-400 to-purple-400 h-full rounded-full transition-all duration-1000"
-                    style={{ width: `${moodData.valence * 100}%` }}
-                  ></div>
-                </div>
-                <span className="text-white text-sm font-medium">{Math.round(moodData.valence * 100)}%</span>
-              </div>
-            </div>
-          </div>
+          {/* Remove energy_level and valence UI */}
         </CardContent>
       </Card>
 
