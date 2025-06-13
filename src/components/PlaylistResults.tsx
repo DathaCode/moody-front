@@ -4,28 +4,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Music, Play, Heart, Shuffle, ExternalLink, RotateCcw } from "lucide-react"
+import { MoodData, Track } from "@/lib/api"
 
-interface MoodData {
-  primary_emotion: string
-  confidence: number
-  energy_level: number
-  valence: number
-}
-
-interface Track {
-  id: string
-  name: string
-  artist: string
-  album: string
-  image: string
-  preview_url: string | null
-}
-
-interface PlaylistResultsProps {
+export interface PlaylistResultsProps {
   moodData: MoodData
   playlist: Track[]
-  onSpotifyConnect: () => void
+  onSpotifyConnect: () => Promise<void>
   onTryAgain: () => void
+  onSavePlaylist: () => Promise<void>
 }
 
 export function PlaylistResults({ moodData, playlist, onSpotifyConnect, onTryAgain }: PlaylistResultsProps) {

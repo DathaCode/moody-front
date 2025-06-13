@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { Card, CardContent } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
+import { exchangeSpotifyCode } from "@/lib/api"
 
 export default function CallbackPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
@@ -21,17 +22,18 @@ export default function CallbackPage() {
           throw new Error("No authorization code found")
         }
 
-        // In a real implementation, exchange the code for an access token
-        // const response = await exchangeCodeForToken(code)
+        // Exchange the code for tokens
+        const { tokens, user } = await exchangeSpotifyCode(code)
 
-        // For demo purposes, we'll just simulate success
-        await new Promise((resolve) => setTimeout(resolve, 1500))
+        // Store tokens (in memory, context, or localStorage)
+        localStorage.setItem("spotify_access_token", tokens.access_token)
+        localStorage.setItem("spotify_user_id", user.id)
 
         setStatus("success")
 
-        // Redirect back to the main page with success status
+        // Redirect to home
         setTimeout(() => {
-          navigate("/?auth=success")
+          navigate("/")
         }, 1000)
       } catch (error) {
         console.error("Authentication error:", error)

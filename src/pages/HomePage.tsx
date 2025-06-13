@@ -1,36 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Music, Sparkles, Heart, Zap, Cloud, Coffee } from "lucide-react"
 import { MoodAnalysis } from "@/components/MoodAnalysis"
 import { PlaylistResults } from "@/components/PlaylistResults"
-import { analyzeMood, generatePlaylist } from "@/lib/api"
-
-interface MoodData {
-  primary_emotion: string
-  confidence: number
-  energy_level: number
-  valence: number
-}
-
-interface Track {
-  id: string
-  name: string
-  artist: string
-  album: string
-  image: string
-  preview_url: string | null
-}
+import { MoodData, Track, analyzeMood, previewPlaylist, generatePlaylist, getSpotifyAuthUrl, exchangeSpotifyCode } from "@/lib/api"
 
 export default function HomePage() {
   const [moodText, setMoodText] = useState("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [moodData, setMoodData] = useState<MoodData | null>(null)
   const [playlist, setPlaylist] = useState<Track[]>([])
-  const [isSpotifyConnected, setIsSpotifyConnected] = useState(false)
+  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
   const [step, setStep] = useState<"input" | "analysis" | "results" | "success">("input")
 
   const moodSuggestions = [
@@ -40,6 +25,19 @@ export default function HomePage() {
     { icon: Coffee, text: "Cozy and introspective", color: "text-amber-500" },
   ]
 
+  // On mount, check for Spotify auth code in URL (after redirect)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get("code")
+    if (code && !accessToken) {
+      exchangeSpotifyCode(code).then(({ tokens, user }) => {
+        setAccessToken(tokens.access_token)
+        setUserId(user.id)
+        window.history.replaceState({}, document.title, "/") // Clean URL
+      })
+    }
+  }, [])
+
   const handleMoodSubmit = async () => {
     if (!moodText.trim()) return
 
@@ -47,16 +45,23 @@ export default function HomePage() {
     setStep("analysis")
 
     try {
-      // In a real implementation, call the OpenAI API for mood analysis
-      // For now, we'll use a mock implementation
       const moodResult = await analyzeMood(moodText)
-      setMoodData(moodResult)
+      // Normalize if needed
+      const normalizedMood: MoodData = {
+        primaryEmotion: moodResult.primaryEmotion,
+        emotions: moodResult.emotions,
+        confidence: moodResult.confidence,
+        rawText: moodResult.rawText,
+      }
+      setMoodData(normalizedMood)
 
-      // Generate playlist based on mood
-      const playlistResult = await generatePlaylist(moodResult)
-      setPlaylist(playlistResult)
-
-      setStep("results")
+      if (accessToken) {
+        const playlistResult = await previewPlaylist(normalizedMood, accessToken)
+        setPlaylist(playlistResult)
+        setStep("results")
+      } else {
+        setStep("results")
+      }
     } catch (error) {
       console.error("Error analyzing mood:", error)
     } finally {
@@ -64,21 +69,24 @@ export default function HomePage() {
     }
   }
 
-  const handleSpotifyConnect = () => {
-    // In a real implementation, redirect to Spotify OAuth
-    const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID
-    const redirectUri = `${window.location.origin}/callback`
-    const scope = "playlist-modify-public playlist-modify-private user-read-private"
+  const handleSpotifyConnect = async () => {
+    const authUrl = await getSpotifyAuthUrl()
+    window.location.href = authUrl
+  }
 
-    // For demo purposes, we'll just simulate the connection
-    setTimeout(() => {
-      setIsSpotifyConnected(true)
+  const handleSavePlaylist = async () => {
+    if (!moodData || !accessToken || !userId) return
+
+    setIsAnalyzing(true)
+
+    try {
+      await generatePlaylist(moodData, accessToken, userId)
       setStep("success")
-    }, 1000)
-
-    // Uncomment for real Spotify integration:
-    // const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}`
-    // window.location.href = authUrl
+    } catch (error) {
+      alert("Failed to save playlist to Spotify.")
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
   const resetApp = () => {
@@ -172,6 +180,7 @@ export default function HomePage() {
               playlist={playlist}
               onSpotifyConnect={handleSpotifyConnect}
               onTryAgain={resetApp}
+              onSavePlaylist={handleSavePlaylist}
             />
           )}
 
