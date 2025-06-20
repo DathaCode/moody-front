@@ -90,7 +90,7 @@ REDIRECT_URI=http://127.0.0.1:5173/callback
 
 ## 🌐 Credits / Documentations
  
-Spotify Web API Docs
-OpenAI API
-Tailwind CSS
+Spotify Web API Docs,
+OpenAI API,
+Tailwind CSS,
 Vite
