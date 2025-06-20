@@ -1,54 +1,96 @@
-# React + TypeScript + Vite
+# 🎧 Moody – Mood-Based Playlist Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Moody is a full-stack web application that uses **natural language AI** to detect your emotional state and generate personalized music playlists using the **Spotify Web API**.
 
-Currently, two official plugins are available:
+Built using **OpenAI + Spotify**, Moody transforms your feelings into handpicked tracks that match your mood.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## 🚀 Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 🧠 AI-powered mood analysis (OpenAI / GPT-4)
+- 🎧 Playlist generation via Spotify
+- 🔐 OAuth2.0 authentication flow
+- 🎨 Clean, responsive UI (Vite + Tailwind + ShadCN)
+- 🎼 Real audio feature matching (valence, energy, etc.)
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ⚙️ Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Layer       | Stack                                     |
+|-------------|-------------------------------------------|
+| Frontend    | React (Vite) + TypeScript + Tailwind CSS  |
+| Backend     | Node.js + Express                         |
+| AI          | OpenAI API (GPT-4 / GPT-3.5)              |
+| Music API   | Spotify Web API                           |
+| Auth        | OAuth 2.0 (Spotify)                       |
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+---
+
+## 📡 API Endpoint Summary
+
+| Endpoint                   | Status       | Notes                                          |
+|---------------------------|--------------|------------------------------------------------|
+| `POST /api/mood/analyze`  | ✅ Working    | Mood analysis via OpenAI                       |
+| `POST /api/spotify/callback` | ✅ Working | Token exchange + user profile                  |
+| `GET /api/spotify/user`   | ✅ Working    | User profile with token                        |
+| `POST /api/playlist/preview` | ✅ Working | Track preview for mood                         |
+| `POST /api/playlist/generate` | ❌ Failing | Spotify genre/recommendation 404 error         |
+| `GET /api/spotify/genres` | ❌ Failing    | Spotify genre 404 error                        |
+| `POST /api/spotify/refresh` | ⏳ Not checked | Refresh token endpoint                         |
+| `GET /api/mood/test`      | ⏳ Not checked | Mood API health check                          |
+| `GET /api/playlist/test`  | ⏳ Not checked | Playlist API health check                      |
+
+> ❗ If you're contributing or testing, prioritize fixing `/api/playlist/generate` and `/api/spotify/genres`.
+
+---
+
+## 🛠️ Local Development Setup
+###  1. Clone the Repository
+bash
+git clone https://github.com/your-username/moody.git
+cd moody
+
+2. Set Up Frontend
+cd moody-front
+npm install
+npm run dev -- --host 127.0.0.1
+
+3. Set Up Backend
+cd ../moody-back
+npm install
+npm run dev
+
+🔐 Spotify Redirect URI Setup (2025 Update)
+Since April 2025, Spotify does not allow localhost in redirect URIs. Follow this format instead:
+✅ Use 127.0.0.1 or [::1]:
+Add this in your Spotify Developer Console:
+http://127.0.0.1:5173/callback
+
+💡 Environment Variables
+.env:
+VITE_SPOTIFY_REDIRECT_URI=http://127.0.0.1:5173/callback
+
+Frontend (moody-front/.env)
+VITE_SPOTIFY_CLIENT_ID=your_spotify_client_id
+VITE_SPOTIFY_REDIRECT_URI=http://127.0.0.1:5173/callback
+
+Backend (moody-back/.env)
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+OPENAI_API_KEY=your_openai_key
+REDIRECT_URI=http://127.0.0.1:5173/callback
+
+🧪 Known Issues / Todos
+ Fix POST /api/playlist/generate (Spotify recommendations endpoint returns 404)
+ Fix GET /api/spotify/genres (Spotify genre endpoint fails or misused)
+ Add /refresh token handler for long sessions
+ Add retry/error UI for failed playlist generation
+
+## 🌐 Credits / Documentations
+ 
+Spotify Web API Docs
+OpenAI API
+Tailwind CSS
+Vite
